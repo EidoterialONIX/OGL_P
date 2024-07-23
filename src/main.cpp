@@ -3,90 +3,113 @@
 
 #include <iostream>
 #include <vector>
+#include<math.h>
+
+
+template <class T>
+class Vec_3 {
+public:
+
+    T _x = 0;
+    T _y = 0;
+    T _z = 0;
+
+    Vec_3() = default;
+
+    Vec_3(T x, T y, T z) : _x(x), _y(y), _z(z) {}
+
+    void operator=(Vec_3<T> v) { _x = v._x; _y = v._y; _z = v._z; }
+
+};
 
 class Point_3 {
 public:
-    GLfloat point[9];
+    GLfloat _point[9];
 
     Point_3() = default;
 
-    Point_3(float p0, float p1, float p2, float p3, float p4, float p5, float p6, float p7, float p8) {
-        point[0] = p0; point[1] = p1; point[2] = p2;
-        point[3] = p3; point[4] = p4; point[5] = p5;
-        point[6] = p6; point[7] = p7; point[8] = p8;
+    Point_3(Vec_3<float> v0, Vec_3<float> v1, Vec_3<float> v2) {
+
+        _point[0] = v0._x; _point[1] = v0._y; _point[2] = v0._z;
+        _point[3] = v1._x; _point[4] = v1._y; _point[5] = v1._z;
+        _point[6] = v2._x; _point[7] = v2._y; _point[8] = v2._z;
 
     };
 
+    void operator=(Point_3 p) {
+
+        _point[0] = p._point[0]; _point[1] = p._point[1]; _point[2] = p._point[2];
+        _point[3] = p._point[3]; _point[4] = p._point[4]; _point[5] = p._point[5];
+        _point[6] = p._point[6]; _point[7] = p._point[7]; _point[8] = p._point[8];
+
+    }
+
+    void operator+=(Point_3 p) {
+        _point[0] += p._point[0]; _point[1] += p._point[1]; _point[2] += p._point[2];
+        _point[3] += p._point[3]; _point[4] += p._point[4]; _point[5] += p._point[5];
+        _point[6] += p._point[6]; _point[7] += p._point[7]; _point[8] += p._point[8];
+    }
+
 };
 
 
-class Vertex_Point_Bufer {
+class Trilangl {
 private:
 
-    std::vector<Point_3> _vpb;
+    Vec_3<float> _position = Vec_3<float>(0.0f, 0.0f, 0.0f);
+
+    Point_3 _points;
 
 
 public:
 
-    Vertex_Point_Bufer() {}
 
+    Trilangl() = default;
 
-    void PUSH_VP(Point_3 p) {
+    void set_Points(Point_3 points) {
 
-        _vpb.resize(_vpb.size() + 1);
-        
-        _vpb[_vpb.size() - 1].point[0] = p.point[0]; _vpb[_vpb.size() - 1].point[1] = p.point[1]; _vpb[_vpb.size() - 1].point[2] = p.point[2];
-        _vpb[_vpb.size() - 1].point[3] = p.point[3]; _vpb[_vpb.size() - 1].point[4] = p.point[4]; _vpb[_vpb.size() - 1].point[5] = p.point[5];
-        _vpb[_vpb.size() - 1].point[6] = p.point[6]; _vpb[_vpb.size() - 1].point[7] = p.point[7]; _vpb[_vpb.size() - 1].point[8] = p.point[8];
+        points += Point_3(_position, _position, _position); 
+
+        _points = points;
 
     }
 
+    void set_Position(Vec_3<float> position) { _position = position; }
 
-    void Resp(int index) {
-        std::cout << "Lenght array: " << _vpb.size() << std::endl;
 
-        for (int i{ 0 }; i < 9; i++) {
-            std::cout << sizeof(_vpb[index]) << std::endl;
-        }
+    Point_3& get_Points() { return _points; }
 
-    }
-
-    std::vector<Point_3>& get_VPB() { return _vpb; }
 
 };
+
+
+
+
 
 
 class Draw_on_screen {
-private:
-
-    Vertex_Point_Bufer VPB;
-
 public:
-    
-
+   
     Draw_on_screen() {}
     
-    void Draw_VPB() {
+    void DRAW_TRILANGL(Trilangl& TRILANGL) {
         GLuint points_vbo = 0;
         glGenBuffers(1, &points_vbo);
+        
+        glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(TRILANGL.get_Points()._point), TRILANGL.get_Points()._point, GL_STATIC_DRAW);
 
-        for (int i{ 0 }; i < VPB.get_VPB().size(); i++) {
-            glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(VPB.get_VPB()[i]), &VPB.get_VPB()[i], GL_STATIC_DRAW);
+        glEnableVertexAttribArray(0);
+        glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
-            glEnableVertexAttribArray(0);
-            glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-            glDrawArrays(GL_TRIANGLES, 0, 3);
-
-        }
+        glDrawArrays(GL_TRIANGLES, 0, 3);
 
     }
-    
-    Vertex_Point_Bufer& get_VPB() { return VPB; }
 
 };
+
+
 
 
 class bg {
@@ -129,9 +152,12 @@ void glfwKeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int
 }
 
 
+
+Trilangl tril1;
+
+
 Draw_on_screen Drawinger;
 
-Point_3 points(0.0f, 0.5f, 0.0f, -0.5f, -0.5f, 0.0f, 0.5f, -0.5f, 0.0f);
 
 
 int main(void)
@@ -172,29 +198,10 @@ int main(void)
     glClearColor(1, 1, 0, 1);
 
 
-    Drawinger.get_VPB().PUSH_VP(points);
+    tril1.set_Position(Vec_3<float>(-0.5f, 0.5f, 0.0f));
 
-    Drawinger.get_VPB().Resp(0);
-
-    /*
-    GLuint vs = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vs, 1, &vertex_shader, nullptr);
-    glCompileShader(vs);
-
-    GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fs, 1, &fragment_shader, nullptr);
-    glCompileShader(fs);
-
-    GLuint shader_program = glCreateProgram();
-    glAttachShader(shader_program, vs);
-    glAttachShader(shader_program, fs);
-    glLinkProgram(shader_program);
-
-    glDeleteShader(vs);
-    glDeleteShader(fs);
-
-    */
-
+    tril1.set_Points(Point_3(Vec_3<float>(0.5f, 0.5f, 0.0f), Vec_3<float>(-0.5f, 0.5f, 0.0f), Vec_3<float>(-0.5f, -0.5f, 0.0f)));
+    
    
 
     /* Loop until the user closes the window */
@@ -204,7 +211,7 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        Drawinger.Draw_VPB();
+        Drawinger.DRAW_TRILANGL(tril1);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(pWindow);
