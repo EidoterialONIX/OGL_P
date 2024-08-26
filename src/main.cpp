@@ -6,6 +6,19 @@
 #include<math.h>
 
 
+struct Options {
+
+    int WINDOW_SIZE[2] = { 640, 480 };
+
+
+};
+
+
+Options _options;
+
+
+
+
 template <class T>
 class Vec_3 {
 public:
@@ -24,6 +37,7 @@ public:
 
 class Point_3 {
 public:
+
     GLfloat _point[9];
 
     Point_3() = default;
@@ -52,40 +66,139 @@ public:
 
 };
 
-
-class Trilangl {
+class Ordinary_Geometry {
 private:
 
-    Vec_3<float> _position = Vec_3<float>(0.0f, 0.0f, 0.0f);
+    Point_3 _points = Point_3(Vec_3<float>(0.0f, 0.0f, 0.0f), Vec_3<float>(0.0f, 0.0f, 0.0f), Vec_3<float>(0.0f, 0.0f, 0.0f));
 
-    Point_3 _points;
+    Point_3 _points_transform = Point_3(Vec_3<float>(0.0f, 0.0f, 0.0f), Vec_3<float>(0.0f, 0.0f, 0.0f), Vec_3<float>(0.0f, 0.0f, 0.0f));
+
+public:
+
+    Ordinary_Geometry() = default;
+
+    Point_3& get_Points_Transform() { return _points_transform; }
+    void set_Points_Transform(Point_3 new_points_transform) { _points_transform = new_points_transform; }
+
+    Point_3& get_Points() { return _points; }
+    void set_Points(Point_3 new_points) { _points = new_points; }
+
+    void set_Point_of_Index(int index, Vec_3<float> new_point) {
+        if (index < 0 || index > 2) { std::cout << "Not correct index (0 - 2)"; }
+        else {
+            _points._point[index * 3] = new_point._x;
+            _points._point[1 + index * 3] = new_point._y;
+            _points._point[2 + index * 3] = new_point._z;
+
+        }
+
+    }
+
+    void show_Info_Points() const {
+        for (int i{ 0 }; i < 3; i++) {
+            std::cout << "Point - " << i + 1 << std::endl;
+            std::cout << "------ " << "X: " << _points._point[i * 3] << " Y: " << _points._point[1 + i * 3] << " Z: " << _points._point[2 + i * 3] << std::endl;
+ 
+        }
+
+        std::cout << "###############" << std::endl;
+
+        for (int i{ 0 }; i < 3; i++) {
+            std::cout << "Point - " << i + 1 << std::endl;
+            std::cout << "------ " << "X: " << _points_transform._point[i * 3] << " Y: " << _points_transform._point[1 + i * 3] << " Z: " << _points_transform._point[2 + i * 3] << std::endl;
+
+        }
+       
+    }
+
+};
+
+class Transform {
+private:
+
+    Vec_3<float> _position;
+    float _scale = 1;
+
+public:
+
+    Transform() = default;
+
+    Vec_3<float> get_Position() const { return _position; }
+    void set_Position(Vec_3<float> new_position) { _position = new_position; }
+
+    float get_Scale() const { return _scale; }
+    void set_Scale(float new_scale) { _scale = new_scale; }
+
+    void TRANSFORM_POSITION(Ordinary_Geometry &o_g) const {
+        for (int i{ 0 }; i < 3; i++) {
+            o_g.get_Points()._point[i * 3] += _position._x;
+            o_g.get_Points()._point[1 + i * 3] += _position._y;
+            o_g.get_Points()._point[2 + i * 3] += _position._z;
+        }
+        
+    }
+
+    void TRANSFORM_SCALE(Ordinary_Geometry& o_g) const {
+        for (int i{ 0 }; i < 3; i++) {
+            o_g.get_Points()._point[i * 3] *= _scale;
+            o_g.get_Points()._point[1 + i * 3] *= _scale;
+            o_g.get_Points()._point[2 + i * 3] *= _scale;
+        }
+
+    }
+
+    void TRANSFORM_POINTS(Ordinary_Geometry& o_g, Options options) {
+        Point_3 new_points = Point_3(Vec_3<float>(0.0f, 0.0f, 0.0f), Vec_3<float>(0.0f, 0.0f, 0.0f), Vec_3<float>(0.0f, 0.0f, 0.0f));
+
+        for (int i{ 0 }; i < 3; i++) {
+
+            new_points._point[i * 3] = (o_g.get_Points()._point[i * 3] / (options.WINDOW_SIZE[0] / 2 / 100) - 100) / 100;
+            
+            new_points._point[1 + i * 3] = (o_g.get_Points()._point[1 + i * 3] / (options.WINDOW_SIZE[1] / 2 / 100) - 100) / 100;
+        }
+
+        o_g.set_Points_Transform(new_points);
+
+    }
+};
+
+
+class Trilangl : public Transform {
+private:
+
+    float _radius = 0.0f;
+
+    Ordinary_Geometry _figur;
 
 
 public:
 
-
     Trilangl() = default;
 
-    void set_Points(Point_3 points) {
+    float get_Radius() const { return _radius; }
+    void set_Radius(float new_radius) { _radius = new_radius; }
 
-        points += Point_3(_position, _position, _position); 
+    void set_Trilangl() {
+        TRANSFORM_POSITION(_figur);
 
-        _points = points;
+        _figur.get_Points()._point[1] += _radius;
 
+        _figur.get_Points()._point[3] += _radius / 90 * 45;
+        _figur.get_Points()._point[4] -= _radius / 90 * 45;
+
+        _figur.get_Points()._point[6] -= _radius / 90 * 45;
+        _figur.get_Points()._point[7] -= _radius / 90 * 45;
+
+        TRANSFORM_SCALE(_figur);
+
+        TRANSFORM_POINTS(_figur, _options);
+        
     }
 
-    void set_Position(Vec_3<float> position) { _position = position; }
 
-
-    Point_3& get_Points() { return _points; }
-
+    Ordinary_Geometry& get_Ordinary_Geometry() { return _figur; }
 
 };
-
-
-
-
-
 
 class Draw_on_screen {
 public:
@@ -95,9 +208,9 @@ public:
     void DRAW_TRILANGL(Trilangl& TRILANGL) {
         GLuint points_vbo = 0;
         glGenBuffers(1, &points_vbo);
-        
+
         glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(TRILANGL.get_Points()._point), TRILANGL.get_Points()._point, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, sizeof(TRILANGL.get_Ordinary_Geometry().get_Points_Transform()._point), TRILANGL.get_Ordinary_Geometry().get_Points_Transform()._point, GL_STATIC_DRAW);
 
         glEnableVertexAttribArray(0);
         glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
@@ -115,9 +228,9 @@ public:
 class bg {
 public:
 
-    const GLfloat _r[4]{1.0f, 0.0f, 0.0f, 1.0f};
-    const GLfloat _g[4]{ 0.0f, 1.0f, 0.0f, 1.0f };
-    const GLfloat _b[4]{ 0.0f, 0.0f, 1.0f, 1.0f };
+    const GLfloat _r[4]{1.0f, 1.0f, 0.0f, 1.0f};
+    const GLfloat _g[4]{ 0.0f, 1.0f, 1.0f, 1.0f };
+    const GLfloat _b[4]{ 1.0f, 0.0f, 1.0f, 1.0f };
 
     bg() {}
 
@@ -125,14 +238,11 @@ public:
 bg a;
 
 
-int g_windowSizeX = 640;
-int g_windowSizeY = 480;
-
 void glfwWindowSizeCallback(GLFWwindow* pWindow, int width, int height)
 {
-    g_windowSizeX = width;
-    g_windowSizeY = height;
-    glViewport(0, 0, g_windowSizeX, g_windowSizeY);
+    _options.WINDOW_SIZE[0] = width;
+    _options.WINDOW_SIZE[1] = height;
+    glViewport(0, 0, _options.WINDOW_SIZE[0], _options.WINDOW_SIZE[1]);
 }
 
 void glfwKeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int mode)
@@ -151,13 +261,9 @@ void glfwKeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int
     }
 }
 
-
-
-Trilangl tril1;
-
-
 Draw_on_screen Drawinger;
 
+Trilangl tril;
 
 
 int main(void)
@@ -172,8 +278,11 @@ int main(void)
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
 
+
+
+
     /* Create a windowed mode window and its OpenGL context */
-    GLFWwindow* pWindow = glfwCreateWindow(g_windowSizeX, g_windowSizeY, "OGL_P", nullptr, nullptr);
+    GLFWwindow* pWindow = glfwCreateWindow(_options.WINDOW_SIZE[0], _options.WINDOW_SIZE[1], "OGL_P", nullptr, nullptr);
     if (!pWindow)
     {
         std::cout << "glfwCreateWindow failed!" << std::endl;
@@ -181,26 +290,36 @@ int main(void)
         return -1;
     }
 
+
     glfwSetWindowSizeCallback(pWindow, glfwWindowSizeCallback);
     glfwSetKeyCallback(pWindow, glfwKeyCallback);
 
+
+
     /* Make the window's context current */
     glfwMakeContextCurrent(pWindow);
+
+
 
     if (!gladLoadGL())
     {
         std::cout << "Can't load GLAD!" << std::endl;
     }
-
     std::cout << "Renderer: " << glGetString(GL_RENDERER) << std::endl;
     std::cout << "OpenGL version: " << glGetString(GL_VERSION) << std::endl;
 
+
+
     glClearColor(1, 1, 0, 1);
 
+    tril.set_Radius(50.0f);
+    tril.set_Position(Vec_3<float>(600.0f, 200.0f, 0.0f));
 
-    tril1.set_Position(Vec_3<float>(-0.5f, 0.5f, 0.0f));
+    tril.set_Trilangl();
 
-    tril1.set_Points(Point_3(Vec_3<float>(0.5f, 0.5f, 0.0f), Vec_3<float>(-0.5f, 0.5f, 0.0f), Vec_3<float>(-0.5f, -0.5f, 0.0f)));
+    tril.get_Ordinary_Geometry().show_Info_Points();
+
+
     
    
 
@@ -211,7 +330,7 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        Drawinger.DRAW_TRILANGL(tril1);
+        Drawinger.DRAW_TRILANGL(tril);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(pWindow);
