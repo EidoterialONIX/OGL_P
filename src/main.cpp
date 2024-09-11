@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <vector>
-#include<math.h>
+#include <math.h>
 
 
 struct Options {
@@ -17,105 +17,148 @@ struct Options {
 Options _options;
 
 
-
 template <class T>
-class Vec_3 {
+class Vector_3 {
 public:
 
     T _x = 0;
     T _y = 0;
     T _z = 0;
 
-    Vec_3() = default;
+    Vector_3() = default;
 
-    Vec_3(T x, T y, T z) : _x(x), _y(y), _z(z) {}
+    Vector_3(T x, T y, T z) : _x(x), _y(y), _z(z) {}
 
-    void operator=(Vec_3<T> v) { _x = v._x; _y = v._y; _z = v._z; }
+    void operator=(Vector_3<T> v) { _x = v._x; _y = v._y; _z = v._z; }
+
+    bool operator==(Vector_3<T> v) { if (_x == v._x && _y == v._y && _z == v._z) return true; else return false; }
+
+    Vector_3<T> operator+(Vector_3<T> v) { return Vector_3<T>(_x + v._x, _y + v._y, _z + v._z) }
+    Vector_3<T> operator-(Vector_3<T> v) { return Vector_3<T>(_x - v._x, _y - v._y, _z - v._z) }
+    Vector_3<T> operator*(Vector_3<T> v) { return Vector_3<T>(_x * v._x, _y * v._y, _z * v._z) }
+    Vector_3<T> operator/(Vector_3<T> v) { return Vector_3<T>(_x / v._x, _y / v._y, _z / v._z) }
+
+    void operator+=(Vector_3<T> v) { _x = _x + v._x; _y = _y + v._y; _z = _z + v._z }
+    void operator-=(Vector_3<T> v) { _x = _x - v._x; _y = _y - v._y; _z = _z - v._z }
+    void operator*=(Vector_3<T> v) { _x = _x * v._x; _y = _y * v._y; _z = _z * v._z }
+    void operator-=(Vector_3<T> v) { _x = _x / v._x; _y = _y / v._y; _z = _z / v._z }
 
 };
 
 class Point_3 {
-public:
+private:
 
-    GLfloat _point[9];
+    GLfloat _cordinats[9];
 
-    Point_3() = default;
+    Vector_3<float> _point[3];
 
-    Point_3(Vec_3<float> v0, Vec_3<float> v1, Vec_3<float> v2) {
+    void _Update() {
 
-        _point[0] = v0._x; _point[1] = v0._y; _point[2] = v0._z;
-        _point[3] = v1._x; _point[4] = v1._y; _point[5] = v1._z;
-        _point[6] = v2._x; _point[7] = v2._y; _point[8] = v2._z;
+        for (int i{ 0 }; i < 3; i++) {
 
-    };
+            _cordinats[i * 3] = _point[i]._x;
+            _cordinats[1 + i * 3] = _point[i]._y;
+            _cordinats[2 + i * 3] = _point[i]._z;
 
-    void operator=(Point_3 p) {
-
-        _point[0] = p._point[0]; _point[1] = p._point[1]; _point[2] = p._point[2];
-        _point[3] = p._point[3]; _point[4] = p._point[4]; _point[5] = p._point[5];
-        _point[6] = p._point[6]; _point[7] = p._point[7]; _point[8] = p._point[8];
+        }
 
     }
 
+public:
+
+    Point_3() = default;
+
+    Point_3(Vector_3<float> v0, Vector_3<float> v1, Vector_3<float> v2) {
+
+        _point[0] = v0; _point[1] = v1; _point[2] = v2;
+
+        _Update();
+
+    };
+
+    Vector_3<float> get_Point(int index) const { return _point[index]; }
+    void set_Point(int index, Vector_3<float> v) { _point[index] = v; _Update(); }
+    void set_Points(Vector_3<float> v0, Vector_3<float> v1, Vector_3<float> v2) {
+
+        _point[0] = v0; _point[1] = v1; _point[2] = v2;
+
+        _Update();
+
+    }
+
+    void operator=(Point_3 p) {
+
+        _point[0] = p.get_Point(0); _point[1] = p.get_Point(1); _point[2] = p.get_Point(2);
+
+        _Update();
+
+    }
+
+    bool operator==(Point_3 p) { if (_point[0] == p.get_Point(0) && _point[1] == p.get_Point(1) && _point[2] == p.get_Point(2)) return true; else return false; }
+
+    Point_3 operator+(Point_3 p) { return Point_3(_point[0] + p.get_Point(0), _point[1] + p.get_Point(1), _point[2] + p.get_Point(2)); }
+    Point_3 operator-(Point_3 p) { return Point_3(_point[0] - p.get_Point(0), _point[1] - p.get_Point(1), _point[2] - p.get_Point(2)); }
+    Point_3 operator*(Point_3 p) { return Point_3(_point[0] * p.get_Point(0), _point[1] * p.get_Point(1), _point[2] * p.get_Point(2)); }
+    Point_3 operator/(Point_3 p) { return Point_3(_point[0] / p.get_Point(0), _point[1] / p.get_Point(1), _point[2] / p.get_Point(2)); }
+
     void operator+=(Point_3 p) {
-        _point[0] += p._point[0]; _point[1] += p._point[1]; _point[2] += p._point[2];
-        _point[3] += p._point[3]; _point[4] += p._point[4]; _point[5] += p._point[5];
-        _point[6] += p._point[6]; _point[7] += p._point[7]; _point[8] += p._point[8];
+
+        _point[0] = _point[0] + p.get_Point(0); _point[1] = _point[1] + p.get_Point(1); _point[2] = _point[2] + p.get_Point(2);
+
+        _Update();
+
+    }
+    void operator-=(Point_3 p) {
+
+        _point[0] = _point[0] - p.get_Point(0); _point[1] = _point[1] - p.get_Point(1); _point[2] = _point[2] - p.get_Point(2);
+
+        _Update();
+
+    }
+    void operator+=(Point_3 p) {
+
+        _point[0] = _point[0] * p.get_Point(0); _point[1] = _point[1] * p.get_Point(1); _point[2] = _point[2] * p.get_Point(2);
+
+        _Update();
+
+    }
+    void operator+=(Point_3 p) {
+
+        _point[0] = _point[0] / p.get_Point(0); _point[1] = _point[1] / p.get_Point(1); _point[2] = _point[2] / p.get_Point(2);
+
+        _Update();
+
     }
 
 };
 
-class Ordinary_Geometry {
+class Primitive {
 private:
 
-    Point_3 _points = Point_3(Vec_3<float>(0.0f, 0.0f, 0.0f), Vec_3<float>(0.0f, 0.0f, 0.0f), Vec_3<float>(0.0f, 0.0f, 0.0f));
+    Point_3 _real_cordinat = Point_3(Vector_3<float>(0.0f, 0.0f, 0.0f), Vector_3<float>(0.0f, 0.0f, 0.0f), Vector_3<float>(0.0f, 0.0f, 0.0f));
 
-    Point_3 _points_transform = Point_3(Vec_3<float>(0.0f, 0.0f, 0.0f), Vec_3<float>(0.0f, 0.0f, 0.0f), Vec_3<float>(0.0f, 0.0f, 0.0f));
+    Point_3 _transform_cordinat = Point_3(Vector_3<float>(0.0f, 0.0f, 0.0f), Vector_3<float>(0.0f, 0.0f, 0.0f), Vector_3<float>(0.0f, 0.0f, 0.0f));
 
 public:
 
-    Ordinary_Geometry() = default;
+    Primitive() = default;
 
-    Point_3& get_Points_Transform() { return _points_transform; }
-    void set_Points_Transform(Point_3 new_points_transform) { _points_transform = new_points_transform; }
+    Point_3 get_Real_Cordinat() const { return _real_cordinat; }
 
-    Point_3& get_Points() { return _points; }
-    void set_Points(Point_3 new_points) { _points = new_points; }
+    Point_3 get_Transform_Cordinat() const { return _transform_cordinat; }
+    
+    void _Show_Information_Real_Cordinat();
 
-    void set_Point_of_Index(int index, Vec_3<float> new_point) {
-        if (index < 0 || index > 2) { std::cout << "Not correct index (0 - 2)"; }
-        else {
-            _points._point[index * 3] = new_point._x;
-            _points._point[1 + index * 3] = new_point._y;
-            _points._point[2 + index * 3] = new_point._z;
-
-        }
-
-    }
-
-    void show_Info_Points() const {
-        for (int i{ 0 }; i < 3; i++) {
-            std::cout << "Point - " << i + 1 << std::endl;
-            std::cout << "------ " << "X: " << _points._point[i * 3] << " Y: " << _points._point[1 + i * 3] << " Z: " << _points._point[2 + i * 3] << std::endl;
- 
-        }
-
-        std::cout << "###############" << std::endl;
-
-        for (int i{ 0 }; i < 3; i++) {
-            std::cout << "Point - " << i + 1 << std::endl;
-            std::cout << "------ " << "X: " << _points_transform._point[i * 3] << " Y: " << _points_transform._point[1 + i * 3] << " Z: " << _points_transform._point[2 + i * 3] << std::endl;
-
-        }
-       
-    }
+    void _Show_Information_Transform_Cordinat();
 
 };
 
 class Transform {
 private:
 
-    Vec_3<float> _position;
+    
+
+    Vector_3<float> _position;
     float _scale = 1;
 
 public:
@@ -166,7 +209,6 @@ class Trilangl : public Transform {
 private:
 
     float _radius = 0.0f;
-
     Ordinary_Geometry _figur;
 
 
@@ -200,7 +242,6 @@ public:
     Ordinary_Geometry& get_Ordinary_Geometry() { return _figur; }
 
 };
-
 
 
 class Rect : public Transform {
@@ -282,13 +323,9 @@ public:
 
         }
 
-        
-
     }
 
 };
-
-
 
 
 class bg {
@@ -388,6 +425,7 @@ int main(void)
 
     rect.set_Position(Vec_3<float>(0.0f, 0.0f, 0.0f));
     rect.set_Size(Vec_3<float>(100.0f, 100.0f, 0.0f));
+    rect.set_Scale(1.4f);
 
     rect.set_Rect();
 
