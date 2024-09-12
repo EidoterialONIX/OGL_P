@@ -18,12 +18,28 @@ Options _options;
 
 class Transform {
 private:
+    
+    Vector_3<float> _scale = Vector_3<float>(1.0f, 1.0f, 1.0f);
 
-    Vector_3<float> _origin;
+    int _rotate = 0;
+
 
 public:
 
     Transform() = default;
+
+    void TRANSFORM_SCALE(Primitive& primitive) {
+        primitive *= Primitive(_scale, _scale, _scale);
+    }
+
+    void TRANSFORM_ROTATE(Primitive& primitive);
+
+    GLfloat* CONVERT_CORDINAT(Primitive primitive, Options option) {
+        GLfloat cordinat[9];
+
+
+
+    }
 
 };
 
@@ -37,6 +53,8 @@ private:
     int _count_point = 4;
 
     Vector_3<float> _points[4];
+
+    Vector_3<float> _origin;
 
     void _Update() {
 
@@ -54,12 +72,22 @@ public:
         _position = Vector_3<float>(0.0f, 0.0f, 0.0f);
 
         _size = Vector_3<float>(0.0f, 0.0f, 0.0f);
+
+        _origin = Vector_3<float>(0.0f, 0.0f, 0.0f);
         
         _Update();
 
     };
 
+    Vector_3<float> get_Position() const { return _position; }
+    void set_Position(Vector_3<float> position) { _position = position; _Update(); }
 
+    Vector_3<float> get_Size() const { return _size; }
+    void set_Size(Vector_3<float> size) { _size = size; _Update(); }
+
+    int get_Count_Point() const { return _count_point; }
+
+    Vector_3<float> get_Point(int index) const { return _points[index]; }
 
 };
 
@@ -72,14 +100,21 @@ public:
    
     Draw_on_screen() {}
 
-    void Draw(Poligon& RECT) {
-        for (int i{ 0 }; i < 2; i++) {
+    void Draw(Rect& RECT) {
+        Primitive primitive;
+
+        for (int i{ 0 }; i < RECT.get_Count_Point() - 2; i++) {
+
+            primitive = Primitive(RECT.get_Point(0), RECT.get_Point(1 + i), RECT.get_Point(2 + i));
+
+            RECT.TRANSFORM_SCALE(primitive);
+            ///RECT.TRANSFORM_ROTATE(primitive);
 
             GLuint points_vbo = 0;
             glGenBuffers(1, &points_vbo);
 
             glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(RECT.get_Primitive(i).get_Convert_Cordinat()._cordinats), RECT.get_Primitive(i).get_Convert_Cordinat()._cordinats, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(RECT.CONVERT_CORDINAT(primitive, _options)), RECT.CONVERT_CORDINAT(primitive, _options), GL_STATIC_DRAW);
 
             glEnableVertexAttribArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, points_vbo);

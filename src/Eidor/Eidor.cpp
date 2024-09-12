@@ -35,21 +35,7 @@ private:
 
     Vector_3<float> _point[3];
 
-    void _Update() {
-
-        for (int i{ 0 }; i < 3; i++) {
-
-            _cordinats[i * 3] = _point[i]._x;
-            _cordinats[1 + i * 3] = _point[i]._y;
-            _cordinats[2 + i * 3] = _point[i]._z;
-
-        }
-
-    }
-
 public:
-
-    GLfloat _cordinats[9];
 
     Primitive() = default;
 
@@ -57,18 +43,14 @@ public:
 
         _point[0] = v0; _point[1] = v1; _point[2] = v2;
 
-        _Update();
-
     };
 
     Vector_3<float> get_Point(int index) const { return _point[index]; }
-    void set_Point(int index, Vector_3<float> v) { _point[index] = v; _Update(); }
+    void set_Point(int index, Vector_3<float> v) { _point[index] = v; }
 
     void operator=(Primitive p) {
 
         _point[0] = p.get_Point(0); _point[1] = p.get_Point(1); _point[2] = p.get_Point(2);
-
-        _Update();
 
     }
 
@@ -83,28 +65,20 @@ public:
 
         _point[0] = _point[0] + p.get_Point(0); _point[1] = _point[1] + p.get_Point(1); _point[2] = _point[2] + p.get_Point(2);
 
-        _Update();
-
     }
     void operator-=(Primitive p) {
 
         _point[0] = _point[0] - p.get_Point(0); _point[1] = _point[1] - p.get_Point(1); _point[2] = _point[2] - p.get_Point(2);
-
-        _Update();
 
     }
     void operator*=(Primitive p) {
 
         _point[0] = _point[0] * p.get_Point(0); _point[1] = _point[1] * p.get_Point(1); _point[2] = _point[2] * p.get_Point(2);
 
-        _Update();
-
     }
     void operator/=(Primitive p) {
 
         _point[0] = _point[0] / p.get_Point(0); _point[1] = _point[1] / p.get_Point(1); _point[2] = _point[2] / p.get_Point(2);
-
-        _Update();
 
     }
 
