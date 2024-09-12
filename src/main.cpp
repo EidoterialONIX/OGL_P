@@ -15,188 +15,71 @@ struct Options {
 
 Options _options;
 
-class Primitive {
-private:
-
-    Point_3 _real_cordinat = Point_3(Vector_3<float>(0.0f, 0.0f, 0.0f), Vector_3<float>(0.0f, 0.0f, 0.0f), Vector_3<float>(0.0f, 0.0f, 0.0f));
-
-    Point_3 _transform_cordinat = Point_3(Vector_3<float>(0.0f, 0.0f, 0.0f), Vector_3<float>(0.0f, 0.0f, 0.0f), Vector_3<float>(0.0f, 0.0f, 0.0f));
-
-public:
-
-    Primitive() = default;
-
-    Point_3 get_Real_Cordinat() const { return _real_cordinat; }
-
-    Point_3 get_Transform_Cordinat() const { return _transform_cordinat; }
-    
-    void _Show_Information_Real_Cordinat();
-
-    void _Show_Information_Transform_Cordinat();
-
-};
 
 class Transform {
 private:
 
-    
-
-    Vector_3<float> _position;
-    float _scale = 1;
+    Vector_3<float> _origin;
 
 public:
 
     Transform() = default;
 
-    Vec_3<float> get_Position() const { return _position; }
-    void set_Position(Vec_3<float> new_position) { _position = new_position; }
-
-    float get_Scale() const { return _scale; }
-    void set_Scale(float new_scale) { _scale = new_scale; }
-
-    void TRANSFORM_POSITION(Ordinary_Geometry &o_g) const {
-        for (int i{ 0 }; i < 3; i++) {
-            o_g.get_Points()._point[i * 3] = _position._x;
-            o_g.get_Points()._point[1 + i * 3] = _position._y;
-            o_g.get_Points()._point[2 + i * 3] = _position._z;
-        }
-        
-    }
-
-    void TRANSFORM_SCALE(Ordinary_Geometry& o_g) const {
-        for (int i{ 0 }; i < 3; i++) {
-            o_g.get_Points()._point[i * 3] *= _scale;
-            o_g.get_Points()._point[1 + i * 3] *= _scale;
-            o_g.get_Points()._point[2 + i * 3] *= _scale;
-        }
-
-    }
-
-    void TRANSFORM_POINTS(Ordinary_Geometry& o_g, Options options) {
-        Point_3 new_points = Point_3(Vec_3<float>(0.0f, 0.0f, 0.0f), Vec_3<float>(0.0f, 0.0f, 0.0f), Vec_3<float>(0.0f, 0.0f, 0.0f));
-
-        for (int i{ 0 }; i < 3; i++) {
-
-            new_points._point[i * 3] = (o_g.get_Points()._point[i * 3] / (options.WINDOW_SIZE[0] / 2.0f / 100.0f) - 100) / 100.0f;
-            
-            new_points._point[1 + i * 3] = -(o_g.get_Points()._point[1 + i * 3] / (options.WINDOW_SIZE[1] / 2.0f / 100.0f) - 100) / 100.0f;
-        }
-
-        o_g.set_Points_Transform(new_points);
-
-    }
 };
-
-
-class Trilangl : public Transform {
-private:
-
-    float _radius = 0.0f;
-    Ordinary_Geometry _figur;
-
-
-public:
-
-    Trilangl() = default;
-
-    float get_Radius() const { return _radius; }
-    void set_Radius(float new_radius) { _radius = new_radius; }
-
-    void set_Trilangl() {
-        TRANSFORM_POSITION(_figur);
-
-        _figur.get_Points()._point[1] -= _radius;
-
-        _figur.get_Points()._point[3] -= (_radius / 90) * 45;
-        _figur.get_Points()._point[4] += (_radius / 90) * 45;
-
-        _figur.get_Points()._point[6] += (_radius / 90) * 45;
-        _figur.get_Points()._point[7] += (_radius / 90) * 45;
-
-        std::cout << (_radius / 90) * 45 << std::endl;
-
-        TRANSFORM_SCALE(_figur);
-
-        TRANSFORM_POINTS(_figur, _options);
-        
-    }
-
-
-    Ordinary_Geometry& get_Ordinary_Geometry() { return _figur; }
-
-};
-
 
 class Rect : public Transform {
 private:
 
-    Vec_3<float> _size = Vec_3<float>(0.0f, 0.0f, 0.0f);
+    Vector_3<float> _position;
 
-    Ordinary_Geometry _figur[2];
+    Vector_3<float> _size;
 
-public:
+    int _count_point = 4;
 
-    Rect() = default;
+    Vector_3<float> _points[4];
 
-    Vec_3<float> get_Size() const { return _size; }
-    void set_Size(Vec_3<float> new_size) { _size = new_size; }
+    void _Update() {
 
-    void set_Rect() {
-        TRANSFORM_POSITION(_figur[0]);
-        TRANSFORM_POSITION(_figur[1]);
-
-        /// First figur
-        _figur[0].get_Points()._point[3] += _size._x;
-        _figur[0].get_Points()._point[4] += _size._y;
-
-        _figur[0].get_Points()._point[7] += _size._y;
-
-        /// Second figur
-        _figur[1].get_Points()._point[3] += _size._x;
-
-        _figur[1].get_Points()._point[6] += _size._x;
-        _figur[1].get_Points()._point[7] += _size._y;
-
-        TRANSFORM_SCALE(_figur[0]);
-        TRANSFORM_SCALE(_figur[1]);
-
-        TRANSFORM_POINTS(_figur[0], _options);
-        TRANSFORM_POINTS(_figur[1], _options);
+        _points[0] = _position;
+        _points[1] = _position + Vector_3<float>(_size._x, 0.0f, 0.0f);
+        _points[2] = _position + _size;
+        _points[3] = _position + Vector_3<float>(0.0f, _size._y, 0.0f);
 
     }
 
-    Ordinary_Geometry& get_Ordinary_Geometry(int index) { return _figur[index]; }
+public:
+
+    Rect() {
+        
+        _position = Vector_3<float>(0.0f, 0.0f, 0.0f);
+
+        _size = Vector_3<float>(0.0f, 0.0f, 0.0f);
+        
+        _Update();
+
+    };
+
+
 
 };
+
+
+
+
 
 class Draw_on_screen {
 public:
    
     Draw_on_screen() {}
-    
-    void DRAW_TRILANGL(Trilangl& TRILANGL) {
-        GLuint points_vbo = 0;
-        glGenBuffers(1, &points_vbo);
 
-        glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(TRILANGL.get_Ordinary_Geometry().get_Points_Transform()._point), TRILANGL.get_Ordinary_Geometry().get_Points_Transform()._point, GL_STATIC_DRAW);
-
-        glEnableVertexAttribArray(0);
-        glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-        glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
-
-        glDrawArrays(GL_TRIANGLES, 0, 3);
-
-    }
-
-    void DRAW_RECT(Rect& RECT) {
+    void Draw(Poligon& RECT) {
         for (int i{ 0 }; i < 2; i++) {
 
             GLuint points_vbo = 0;
             glGenBuffers(1, &points_vbo);
 
             glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(RECT.get_Ordinary_Geometry(i).get_Points_Transform()._point), RECT.get_Ordinary_Geometry(i).get_Points_Transform()._point, GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(RECT.get_Primitive(i).get_Convert_Cordinat()._cordinats), RECT.get_Primitive(i).get_Convert_Cordinat()._cordinats, GL_STATIC_DRAW);
 
             glEnableVertexAttribArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
@@ -249,9 +132,6 @@ void glfwKeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int
 
 Draw_on_screen Drawinger;
 
-Trilangl tril;
-Rect rect;
-
 int main(void)
 {
     /* Initialize the library */
@@ -298,31 +178,12 @@ int main(void)
 
     glClearColor(1, 1, 0, 1);
 
-    tril.set_Radius(100.0f);
-    tril.set_Position(Vec_3<float>(0.0f, 0.0f, 0.0f));
-
-    tril.set_Trilangl();
-
-    tril.get_Ordinary_Geometry().show_Info_Points();
-
-
-    rect.set_Position(Vec_3<float>(0.0f, 0.0f, 0.0f));
-    rect.set_Size(Vec_3<float>(100.0f, 100.0f, 0.0f));
-    rect.set_Scale(1.4f);
-
-    rect.set_Rect();
-
-
-   
-
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(pWindow))
     {
 
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
-
-        Drawinger.DRAW_RECT(rect);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(pWindow);

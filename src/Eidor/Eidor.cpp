@@ -30,10 +30,8 @@ public:
 
 };
 
-class Point_3 {
+class Primitive {
 private:
-
-    GLfloat _cordinats[9];
 
     Vector_3<float> _point[3];
 
@@ -51,9 +49,11 @@ private:
 
 public:
 
-    Point_3() = default;
+    GLfloat _cordinats[9];
 
-    Point_3(Vector_3<float> v0, Vector_3<float> v1, Vector_3<float> v2) {
+    Primitive() = default;
+
+    Primitive(Vector_3<float> v0, Vector_3<float> v1, Vector_3<float> v2) {
 
         _point[0] = v0; _point[1] = v1; _point[2] = v2;
 
@@ -63,15 +63,8 @@ public:
 
     Vector_3<float> get_Point(int index) const { return _point[index]; }
     void set_Point(int index, Vector_3<float> v) { _point[index] = v; _Update(); }
-    void set_Points(Vector_3<float> v0, Vector_3<float> v1, Vector_3<float> v2) {
 
-        _point[0] = v0; _point[1] = v1; _point[2] = v2;
-
-        _Update();
-
-    }
-
-    void operator=(Point_3 p) {
+    void operator=(Primitive p) {
 
         _point[0] = p.get_Point(0); _point[1] = p.get_Point(1); _point[2] = p.get_Point(2);
 
@@ -79,35 +72,35 @@ public:
 
     }
 
-    bool operator==(Point_3 p) { if (_point[0] == p.get_Point(0) && _point[1] == p.get_Point(1) && _point[2] == p.get_Point(2)) return true; else return false; }
+    bool operator==(Primitive p) { if (_point[0] == p.get_Point(0) && _point[1] == p.get_Point(1) && _point[2] == p.get_Point(2)) return true; else return false; }
 
-    Point_3 operator+(Point_3 p) { return Point_3(_point[0] + p.get_Point(0), _point[1] + p.get_Point(1), _point[2] + p.get_Point(2)); }
-    Point_3 operator-(Point_3 p) { return Point_3(_point[0] - p.get_Point(0), _point[1] - p.get_Point(1), _point[2] - p.get_Point(2)); }
-    Point_3 operator*(Point_3 p) { return Point_3(_point[0] * p.get_Point(0), _point[1] * p.get_Point(1), _point[2] * p.get_Point(2)); }
-    Point_3 operator/(Point_3 p) { return Point_3(_point[0] / p.get_Point(0), _point[1] / p.get_Point(1), _point[2] / p.get_Point(2)); }
+    Primitive operator+(Primitive p) { return Primitive(_point[0] + p.get_Point(0), _point[1] + p.get_Point(1), _point[2] + p.get_Point(2)); }
+    Primitive operator-(Primitive p) { return Primitive(_point[0] - p.get_Point(0), _point[1] - p.get_Point(1), _point[2] - p.get_Point(2)); }
+    Primitive operator*(Primitive p) { return Primitive(_point[0] * p.get_Point(0), _point[1] * p.get_Point(1), _point[2] * p.get_Point(2)); }
+    Primitive operator/(Primitive p) { return Primitive(_point[0] / p.get_Point(0), _point[1] / p.get_Point(1), _point[2] / p.get_Point(2)); }
 
-    void operator+=(Point_3 p) {
+    void operator+=(Primitive p) {
 
         _point[0] = _point[0] + p.get_Point(0); _point[1] = _point[1] + p.get_Point(1); _point[2] = _point[2] + p.get_Point(2);
 
         _Update();
 
     }
-    void operator-=(Point_3 p) {
+    void operator-=(Primitive p) {
 
         _point[0] = _point[0] - p.get_Point(0); _point[1] = _point[1] - p.get_Point(1); _point[2] = _point[2] - p.get_Point(2);
 
         _Update();
 
     }
-    void operator+=(Point_3 p) {
+    void operator*=(Primitive p) {
 
         _point[0] = _point[0] * p.get_Point(0); _point[1] = _point[1] * p.get_Point(1); _point[2] = _point[2] * p.get_Point(2);
 
         _Update();
 
     }
-    void operator+=(Point_3 p) {
+    void operator/=(Primitive p) {
 
         _point[0] = _point[0] / p.get_Point(0); _point[1] = _point[1] / p.get_Point(1); _point[2] = _point[2] / p.get_Point(2);
 
