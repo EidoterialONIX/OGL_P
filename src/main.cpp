@@ -34,10 +34,13 @@ public:
 
     void TRANSFORM_ROTATE(Primitive& primitive);
 
-    GLfloat* CONVERT_CORDINAT(Primitive primitive, Options option) {
-        GLfloat cordinat[9];
+    void CONVERT_CORDINAT(Primitive primitive, GLfloat* cordinat, Options option) {
 
+        for (int i{ 0 }; i < 3; i++) {
+            cordinat[i * 3] = (primitive.get_Point(i)._x / (option.WINDOW_SIZE[0] / 2.0f / 100.0f) - 100) / 100.0f;
+            cordinat[1 + i * 3] = -(primitive.get_Point(i)._y / (option.WINDOW_SIZE[1] / 2.0f / 100.0f) - 100) / 100.0f;
 
+        }
 
     }
 
@@ -96,25 +99,32 @@ public:
 
 
 class Draw_on_screen {
+
+    Primitive _primitive;
+
+    GLfloat _cordinat[9];
+
+
 public:
    
-    Draw_on_screen() {}
+    Draw_on_screen() = default;
 
     void Draw(Rect& RECT) {
-        Primitive primitive;
 
         for (int i{ 0 }; i < RECT.get_Count_Point() - 2; i++) {
 
-            primitive = Primitive(RECT.get_Point(0), RECT.get_Point(1 + i), RECT.get_Point(2 + i));
+            _primitive = Primitive(RECT.get_Point(0), RECT.get_Point(1 + i), RECT.get_Point(2 + i));
 
-            RECT.TRANSFORM_SCALE(primitive);
-            ///RECT.TRANSFORM_ROTATE(primitive);
+            RECT.TRANSFORM_SCALE(_primitive);
+            ///RECT.TRANSFORM_ROTATE(_primitive);
+            RECT.CONVERT_CORDINAT(_primitive, _cordinat, _options);
+
 
             GLuint points_vbo = 0;
             glGenBuffers(1, &points_vbo);
 
             glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-            glBufferData(GL_ARRAY_BUFFER, sizeof(RECT.CONVERT_CORDINAT(primitive, _options)), RECT.CONVERT_CORDINAT(primitive, _options), GL_STATIC_DRAW);
+            glBufferData(GL_ARRAY_BUFFER, sizeof(_cordinat), _cordinat, GL_STATIC_DRAW);
 
             glEnableVertexAttribArray(0);
             glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
@@ -142,6 +152,8 @@ public:
 bg a;
 
 
+Rect rect;
+
 void glfwWindowSizeCallback(GLFWwindow* pWindow, int width, int height)
 {
     _options.WINDOW_SIZE[0] = width;
@@ -163,9 +175,14 @@ void glfwKeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int
     else if (key == GLFW_KEY_B && action == GLFW_PRESS) {
         glClearColor(a._b[0], a._b[1], a._b[2], a._b[3]);
     }
+    else if (key == GLFW_KEY_D && action == GLFW_PRESS) {
+        rect.set_Position(rect.get_Position() + Vector_3<float>(3.0f, 0.0f, 0.0f));
+    }
 }
 
 Draw_on_screen Drawinger;
+
+
 
 int main(void)
 {
@@ -213,12 +230,20 @@ int main(void)
 
     glClearColor(1, 1, 0, 1);
 
+
+    rect.set_Position(Vector_3<float>(100.0f, 200.0f, 0.0f));
+    rect.set_Size(Vector_3<float>(150.0f, 100.0f, 0.0f));
+
+
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(pWindow))
     {
 
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+
+        Drawinger.Draw(rect);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(pWindow);

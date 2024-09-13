@@ -18,15 +18,15 @@ public:
 
     bool operator==(Vector_3<T> v) { if (_x == v._x && _y == v._y && _z == v._z) return true; else return false; }
 
-    Vector_3<T> operator+(Vector_3<T> v) { return Vector_3<T>(_x + v._x, _y + v._y, _z + v._z) }
-    Vector_3<T> operator-(Vector_3<T> v) { return Vector_3<T>(_x - v._x, _y - v._y, _z - v._z) }
-    Vector_3<T> operator*(Vector_3<T> v) { return Vector_3<T>(_x * v._x, _y * v._y, _z * v._z) }
-    Vector_3<T> operator/(Vector_3<T> v) { return Vector_3<T>(_x / v._x, _y / v._y, _z / v._z) }
+    Vector_3<T> operator+(Vector_3<T> v) { return Vector_3<T>(_x + v._x, _y + v._y, _z + v._z); }
+    Vector_3<T> operator-(Vector_3<T> v) { return Vector_3<T>(_x - v._x, _y - v._y, _z - v._z); }
+    Vector_3<T> operator*(Vector_3<T> v) { return Vector_3<T>(_x * v._x, _y * v._y, _z * v._z); }
+    Vector_3<T> operator/(Vector_3<T> v) { return Vector_3<T>(_x / v._x, _y / v._y, _z / v._z); }
 
-    void operator+=(Vector_3<T> v) { _x = _x + v._x; _y = _y + v._y; _z = _z + v._z }
-    void operator-=(Vector_3<T> v) { _x = _x - v._x; _y = _y - v._y; _z = _z - v._z }
-    void operator*=(Vector_3<T> v) { _x = _x * v._x; _y = _y * v._y; _z = _z * v._z }
-    void operator-=(Vector_3<T> v) { _x = _x / v._x; _y = _y / v._y; _z = _z / v._z }
+    void operator+=(Vector_3<T> v) { _x = _x + v._x; _y = _y + v._y; _z = _z + v._z; }
+    void operator-=(Vector_3<T> v) { _x = _x - v._x; _y = _y - v._y; _z = _z - v._z; }
+    void operator*=(Vector_3<T> v) { _x = _x * v._x; _y = _y * v._y; _z = _z * v._z; }
+    void operator/=(Vector_3<T> v) { _x = _x / v._x; _y = _y / v._y; _z = _z / v._z; }
 
 };
 
