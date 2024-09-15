@@ -28,11 +28,62 @@ public:
 
     Transform() = default;
 
+    void set_Scale(Vector_3<float> scale) { _scale = scale; }
+
+    void change_Rotate(int rotate) { if (_rotate == 360) _rotate = 0; else _rotate += rotate; }
+
     void TRANSFORM_SCALE(Primitive& primitive) {
         primitive *= Primitive(_scale, _scale, _scale);
     }
 
-    void TRANSFORM_ROTATE(Primitive& primitive);
+    void TRANSFORM_ROTATE(Primitive& primitive, Vector_3<float> size) {
+
+        Vector_3<float> r_sq = Vector_3<float>(size._x / 2.0f, size._y / 2.0f, 0.0f);
+
+        float r = std::sqrt(std::pow(r_sq._x, 2) + std::pow(r_sq._y, 2));
+
+        float lz_x = r - size._x;
+        float lz_y = r - size._y;
+
+        for (int i{ 0 }; i < 3; i++) {
+
+            if (_rotate <= 90) {
+                 
+
+            }
+            else if (_rotate <= 180) {
+
+
+            }
+            else if (_rotate <= 270) {
+
+
+            }
+            else if (_rotate <= 360) {
+
+
+            }
+
+            if (primitive.get_Point(i)._x <= r_sq._x && primitive.get_Point(i)._y <= r_sq._y) {
+                primitive.get_Point(i)._x += -((lz_x / 45.0f) * _rotate); primitive.get_Point(i)._y += ((lz_y / 45.0f) * _rotate);
+
+            }
+            else if (primitive.get_Point(i)._x <= r_sq._x && primitive.get_Point(i)._y >= r_sq._y) {
+                primitive.get_Point(i)._x += ((lz_x / 45.0f) * _rotate); primitive.get_Point(i)._y += ((lz_y / 45.0f) * _rotate);
+
+            }
+            else if (primitive.get_Point(i)._x >= r_sq._x && primitive.get_Point(i)._y >= r_sq._y) {
+                primitive.get_Point(i)._x += -((lz_x / 45.0f) * _rotate); primitive.get_Point(i)._y += ((lz_y / 45.0f) * _rotate);
+
+            }
+            
+
+
+
+
+        }
+
+    }
 
     void CONVERT_CORDINAT(Primitive primitive, GLfloat* cordinat, Options option) {
 
@@ -116,7 +167,7 @@ public:
             _primitive = Primitive(RECT.get_Point(0), RECT.get_Point(1 + i), RECT.get_Point(2 + i));
 
             RECT.TRANSFORM_SCALE(_primitive);
-            ///RECT.TRANSFORM_ROTATE(_primitive);
+            RECT.TRANSFORM_ROTATE(_primitive, RECT.get_Size());
             RECT.CONVERT_CORDINAT(_primitive, _cordinat, _options);
 
 
@@ -178,6 +229,9 @@ void glfwKeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int
     else if (key == GLFW_KEY_D && action == GLFW_PRESS) {
         rect.set_Position(rect.get_Position() + Vector_3<float>(3.0f, 0.0f, 0.0f));
     }
+    else if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+        rect.change_Rotate(1);
+    }
 }
 
 Draw_on_screen Drawinger;
@@ -232,13 +286,17 @@ int main(void)
 
 
     rect.set_Position(Vector_3<float>(120.0f, 200.0f, 0.0f));
-    rect.set_Size(Vector_3<float>(150.0f, 100.0f, 0.0f));
+    rect.set_Size(Vector_3<float>(100.0f, 100.0f, 0.0f));
+
+    
 
 
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(pWindow))
     {
+
+        rect.change_Rotate(1);
 
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);

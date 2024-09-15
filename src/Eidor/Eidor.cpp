@@ -45,7 +45,7 @@ public:
 
     };
 
-    Vector_3<float> get_Point(int index) const { return _point[index]; }
+    Vector_3<float>& get_Point(int index) { return _point[index]; }
     void set_Point(int index, Vector_3<float> v) { _point[index] = v; }
 
     void operator=(Primitive p) {
