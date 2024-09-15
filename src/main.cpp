@@ -36,7 +36,7 @@ public:
         primitive *= Primitive(_scale, _scale, _scale);
     }
 
-    void TRANSFORM_ROTATE(Primitive& primitive, Vector_3<float> size) {
+    void TRANSFORM_ROTATE(Vector_3<float>* points, Vector_3<float> size) {
 
         Vector_3<float> r_sq = Vector_3<float>(size._x / 2.0f, size._y / 2.0f, 0.0f);
 
@@ -48,38 +48,33 @@ public:
         for (int i{ 0 }; i < 3; i++) {
 
             if (_rotate <= 90) {
-                 
+                points[0]._x -= lz_x / 90.0f * _rotate; points[0]._y += lz_y / 90.0f * _rotate;
+                points[1]._x -= lz_x / 90.0f * _rotate; points[1]._y -= lz_y / 90.0f * _rotate;
+                points[2]._x += lz_x / 90.0f * _rotate; points[2]._y -= lz_y / 90.0f * _rotate;
+                points[3]._x += lz_x / 90.0f * _rotate; points[3]._y += lz_y / 90.0f * _rotate;
 
             }
             else if (_rotate <= 180) {
-
+                points[0]._x += lz_x / 180.0f * _rotate; points[0]._y += lz_y / 180.0f * _rotate;
+                points[1]._x -= lz_x / 180.0f * _rotate; points[1]._y += lz_y / 180.0f * _rotate;
+                points[2]._x -= lz_x / 180.0f * _rotate; points[2]._y -= lz_y / 180.0f * _rotate;
+                points[3]._x += lz_x / 180.0f * _rotate; points[3]._y -= lz_y / 180.0f * _rotate;
 
             }
             else if (_rotate <= 270) {
-
+                points[0]._x += lz_x / 270.0f * _rotate; points[0]._y -= lz_y / 270.0f * _rotate;
+                points[1]._x += lz_x / 270.0f * _rotate; points[1]._y += lz_y / 270.0f * _rotate;
+                points[2]._x -= lz_x / 270.0f * _rotate; points[2]._y += lz_y / 270.0f * _rotate;
+                points[3]._x -= lz_x / 270.0f * _rotate; points[3]._y -= lz_y / 270.0f * _rotate;
 
             }
             else if (_rotate <= 360) {
-
-
-            }
-
-            if (primitive.get_Point(i)._x <= r_sq._x && primitive.get_Point(i)._y <= r_sq._y) {
-                primitive.get_Point(i)._x += -((lz_x / 45.0f) * _rotate); primitive.get_Point(i)._y += ((lz_y / 45.0f) * _rotate);
+                points[0]._x -= lz_x / 360.0f * _rotate; points[0]._y -= lz_y / 360.0f * _rotate;
+                points[1]._x += lz_x / 360.0f * _rotate; points[1]._y -= lz_y / 360.0f * _rotate;
+                points[2]._x += lz_x / 360.0f * _rotate; points[2]._y += lz_y / 360.0f * _rotate;
+                points[3]._x -= lz_x / 360.0f * _rotate; points[3]._y += lz_y / 360.0f * _rotate;
 
             }
-            else if (primitive.get_Point(i)._x <= r_sq._x && primitive.get_Point(i)._y >= r_sq._y) {
-                primitive.get_Point(i)._x += ((lz_x / 45.0f) * _rotate); primitive.get_Point(i)._y += ((lz_y / 45.0f) * _rotate);
-
-            }
-            else if (primitive.get_Point(i)._x >= r_sq._x && primitive.get_Point(i)._y >= r_sq._y) {
-                primitive.get_Point(i)._x += -((lz_x / 45.0f) * _rotate); primitive.get_Point(i)._y += ((lz_y / 45.0f) * _rotate);
-
-            }
-            
-
-
-
 
         }
 
@@ -142,6 +137,7 @@ public:
     int get_Count_Point() const { return _count_point; }
 
     Vector_3<float> get_Point(int index) const { return _points[index]; }
+    Vector_3<float>* get_Points() { return _points; }
 
 };
 
@@ -160,14 +156,15 @@ public:
    
     Draw_on_screen() = default;
 
-    void Draw(Rect& RECT) {
+    void Draw(Rect RECT) {
+
+        RECT.TRANSFORM_ROTATE(RECT.get_Points(), RECT.get_Size());
 
         for (int i{ 0 }; i < RECT.get_Count_Point() - 2; i++) {
 
             _primitive = Primitive(RECT.get_Point(0), RECT.get_Point(1 + i), RECT.get_Point(2 + i));
 
             RECT.TRANSFORM_SCALE(_primitive);
-            RECT.TRANSFORM_ROTATE(_primitive, RECT.get_Size());
             RECT.CONVERT_CORDINAT(_primitive, _cordinat, _options);
 
 
@@ -290,8 +287,6 @@ int main(void)
 
     
 
-
-
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(pWindow))
     {
@@ -300,6 +295,7 @@ int main(void)
 
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+
 
         Drawinger.Draw(rect);
 
