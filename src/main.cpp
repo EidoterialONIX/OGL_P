@@ -5,13 +5,105 @@
 #include <math.h>
 
 
+const char* vertex = 
+"#version 140\n"
+"in vec3 aPos;\n"
+"void main()\n"
+"{\n"
+"   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
+"}\0";
+
+const char* fragment =
+"#version 140\n"
+"out vec4 FragColor;"
+"void main()\n"
+"{\n"
+"   FragColor = vec4(1.0f, 0.0f, 0.0f, 1.0f);\n"
+"}\n";
+
+
+
+class Shader_Program {
+private:
+
+    GLuint _shader_program = 0;
+ 
+    void Check_Correct_Compile(GLuint id, const char* type) {
+        
+        int success = 0;
+        char log[512];
+
+        glGetShaderiv(id, GL_COMPILE_STATUS, &success);
+
+        if (!success) {
+            glGetShaderInfoLog(id, 512, NULL, log);
+            std::cout << type << log << std::endl;
+
+        }
+
+    }
+    void Check_Correct_Link() {
+
+        int success = 0;
+        char log[512];
+
+        glGetProgramiv(_shader_program, GL_LINK_STATUS, &success);
+
+        if (!success) {
+            glGetProgramInfoLog(_shader_program, 512, NULL, log);
+            std::cout << "Linker\n" << log << std::endl;
+
+        }
+
+    }
+    
+
+public:
+
+    Shader_Program(const char* vertex_shader, const char* fragment_shader) {
+
+        GLuint vertex_sh = 0;
+        vertex_sh = glCreateShader(GL_VERTEX_SHADER);
+
+        glShaderSource(vertex_sh, 1, &vertex_shader, NULL);
+        glCompileShader(vertex_sh);
+        Check_Correct_Compile(vertex_sh, "Vertex\n");
+
+        GLuint fragment_sh = 0;
+        fragment_sh = glCreateShader(GL_FRAGMENT_SHADER);
+
+        glShaderSource(fragment_sh, 1, &fragment_shader, NULL);
+        glCompileShader(fragment_sh);
+        Check_Correct_Compile(fragment_sh, "Fragment\n");
+
+        _shader_program = glCreateProgram();
+
+        glAttachShader(_shader_program, vertex_sh);
+        glAttachShader(_shader_program, fragment_sh);
+        glLinkProgram(_shader_program);
+        Check_Correct_Link();
+
+        glDeleteShader(vertex_sh);
+        glDeleteShader(fragment_sh);
+
+    }
+
+    void USE() { glUseProgram(_shader_program); }
+
+
+
+};
+
+
+
+
+
 struct Options {
 
     int WINDOW_SIZE[2] = { 640, 480 };
 
 
 };
-
 
 Options _options;
 
@@ -34,50 +126,6 @@ public:
 
     void TRANSFORM_SCALE(Primitive& primitive) {
         primitive *= Primitive(_scale, _scale, _scale);
-    }
-
-    void TRANSFORM_ROTATE(Vector_3<float>* points, Vector_3<float> size) {
-
-        Vector_3<float> r_sq = Vector_3<float>(size._x / 2.0f, size._y / 2.0f, 0.0f);
-
-        float r = std::sqrt(std::pow(r_sq._x, 2) + std::pow(r_sq._y, 2));
-
-        float lz_x = r - size._x;
-        float lz_y = r - size._y;
-
-        for (int i{ 0 }; i < 3; i++) {
-
-            if (_rotate <= 90) {
-                points[0]._x -= lz_x / 90.0f * _rotate; points[0]._y += lz_y / 90.0f * _rotate;
-                points[1]._x -= lz_x / 90.0f * _rotate; points[1]._y -= lz_y / 90.0f * _rotate;
-                points[2]._x += lz_x / 90.0f * _rotate; points[2]._y -= lz_y / 90.0f * _rotate;
-                points[3]._x += lz_x / 90.0f * _rotate; points[3]._y += lz_y / 90.0f * _rotate;
-
-            }
-            else if (_rotate <= 180) {
-                points[0]._x += lz_x / 180.0f * _rotate; points[0]._y += lz_y / 180.0f * _rotate;
-                points[1]._x -= lz_x / 180.0f * _rotate; points[1]._y += lz_y / 180.0f * _rotate;
-                points[2]._x -= lz_x / 180.0f * _rotate; points[2]._y -= lz_y / 180.0f * _rotate;
-                points[3]._x += lz_x / 180.0f * _rotate; points[3]._y -= lz_y / 180.0f * _rotate;
-
-            }
-            else if (_rotate <= 270) {
-                points[0]._x += lz_x / 270.0f * _rotate; points[0]._y -= lz_y / 270.0f * _rotate;
-                points[1]._x += lz_x / 270.0f * _rotate; points[1]._y += lz_y / 270.0f * _rotate;
-                points[2]._x -= lz_x / 270.0f * _rotate; points[2]._y += lz_y / 270.0f * _rotate;
-                points[3]._x -= lz_x / 270.0f * _rotate; points[3]._y -= lz_y / 270.0f * _rotate;
-
-            }
-            else if (_rotate <= 360) {
-                points[0]._x -= lz_x / 360.0f * _rotate; points[0]._y -= lz_y / 360.0f * _rotate;
-                points[1]._x += lz_x / 360.0f * _rotate; points[1]._y -= lz_y / 360.0f * _rotate;
-                points[2]._x += lz_x / 360.0f * _rotate; points[2]._y += lz_y / 360.0f * _rotate;
-                points[3]._x -= lz_x / 360.0f * _rotate; points[3]._y += lz_y / 360.0f * _rotate;
-
-            }
-
-        }
-
     }
 
     void CONVERT_CORDINAT(Primitive primitive, GLfloat* cordinat, Options option) {
@@ -105,6 +153,8 @@ private:
 
     Vector_3<float> _origin;
 
+    float _color[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+
     void _Update() {
 
         _points[0] = _position;
@@ -117,13 +167,13 @@ private:
 public:
 
     Rect() {
-        
+
         _position = Vector_3<float>(0.0f, 0.0f, 0.0f);
 
         _size = Vector_3<float>(0.0f, 0.0f, 0.0f);
 
         _origin = Vector_3<float>(0.0f, 0.0f, 0.0f);
-        
+
         _Update();
 
     };
@@ -139,13 +189,15 @@ public:
     Vector_3<float> get_Point(int index) const { return _points[index]; }
     Vector_3<float>* get_Points() { return _points; }
 
+    void set_Color(float red, float green, float blue, float alpha) { _color[0] = red; _color[1] = green; _color[2] = blue; _color[3] = alpha; };
+    float* get_Color() { return _color; }
 };
 
 
-
-
-
 class Draw_on_screen {
+
+    GLuint VBO = 0;
+    GLuint VAO = 0;
 
     Primitive _primitive;
 
@@ -156,9 +208,7 @@ public:
    
     Draw_on_screen() = default;
 
-    void Draw(Rect RECT) {
-
-        RECT.TRANSFORM_ROTATE(RECT.get_Points(), RECT.get_Size());
+    void Draw(Rect RECT, Shader_Program shader_program) {
 
         for (int i{ 0 }; i < RECT.get_Count_Point() - 2; i++) {
 
@@ -167,17 +217,24 @@ public:
             RECT.TRANSFORM_SCALE(_primitive);
             RECT.CONVERT_CORDINAT(_primitive, _cordinat, _options);
 
+            glGenVertexArrays(1, &VAO);
+            glGenBuffers(1, &VBO);
 
-            GLuint points_vbo = 0;
-            glGenBuffers(1, &points_vbo);
 
-            glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
+            glBindVertexArray(VAO);
+
+            glBindBuffer(GL_ARRAY_BUFFER, VBO);
             glBufferData(GL_ARRAY_BUFFER, sizeof(_cordinat), _cordinat, GL_STATIC_DRAW);
 
+            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), nullptr);
             glEnableVertexAttribArray(0);
-            glBindBuffer(GL_ARRAY_BUFFER, points_vbo);
-            glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, nullptr);
 
+            glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+            glBindVertexArray(0);
+
+            shader_program.USE();
+            glBindVertexArray(VAO);
             glDrawArrays(GL_TRIANGLES, 0, 3);
 
         }
@@ -185,22 +242,6 @@ public:
     }
 
 };
-
-
-class bg {
-public:
-
-    const GLfloat _r[4]{1.0f, 1.0f, 0.0f, 1.0f};
-    const GLfloat _g[4]{ 0.0f, 1.0f, 1.0f, 1.0f };
-    const GLfloat _b[4]{ 1.0f, 0.0f, 1.0f, 1.0f };
-
-    bg() {}
-
-};
-bg a;
-
-
-Rect rect;
 
 void glfwWindowSizeCallback(GLFWwindow* pWindow, int width, int height)
 {
@@ -213,21 +254,6 @@ void glfwKeyCallback(GLFWwindow* pWindow, int key, int scancode, int action, int
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
         glfwSetWindowShouldClose(pWindow, GL_TRUE);
-    }
-    else if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-        glClearColor(a._r[0], a._r[1], a._r[2], a._r[3]);
-    }
-    else if (key == GLFW_KEY_G && action == GLFW_PRESS) {
-        glClearColor(a._g[0], a._g[1], a._g[2], a._g[3]);
-    }
-    else if (key == GLFW_KEY_B && action == GLFW_PRESS) {
-        glClearColor(a._b[0], a._b[1], a._b[2], a._b[3]);
-    }
-    else if (key == GLFW_KEY_D && action == GLFW_PRESS) {
-        rect.set_Position(rect.get_Position() + Vector_3<float>(3.0f, 0.0f, 0.0f));
-    }
-    else if (key == GLFW_KEY_R && action == GLFW_PRESS) {
-        rect.change_Rotate(1);
     }
 }
 
@@ -246,8 +272,6 @@ int main(void)
 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 1);
-
-
 
 
     /* Create a windowed mode window and its OpenGL context */
@@ -281,23 +305,23 @@ int main(void)
 
     glClearColor(1, 1, 0, 1);
 
+    Rect rect;
 
-    rect.set_Position(Vector_3<float>(120.0f, 200.0f, 0.0f));
-    rect.set_Size(Vector_3<float>(100.0f, 100.0f, 0.0f));
+    rect.set_Position(Vector_3<float>(50.0f, 100.0f, 0.0f));
+    rect.set_Size(Vector_3<float>(100.0f, 200.0f, 0.0f));
 
+
+    Shader_Program shader(vertex, fragment);
     
-
+    
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(pWindow))
     {
 
-        rect.change_Rotate(1);
-
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-
-        Drawinger.Draw(rect);
+        Drawinger.Draw(rect, shader);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(pWindow);
